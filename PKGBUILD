@@ -25,6 +25,6 @@ md5sums=('SKIP')
 validpgpkeys=()
 
 package() {
-	cd "$srcdir/drys"
+	cd "$srcdir/$pkgname"
 	make install PREFIX=/usr DESTDIR="$pkgdir"
 }
