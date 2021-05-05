@@ -1,4 +1,4 @@
-set -l SUBCOMMANDS add ls put config repo
+set -l SUBCOMMANDS add rm ls put config repo cd
 
 # {{{ Helper functions
 
@@ -72,8 +72,17 @@ __fish_drys_complete_add -s 'o' -l 'output' -rkf -d 'Destination file'\
 
 # }}}
 
+# {{{ drys rm
+__fish_drys_complete_rm -f -a "(__fish_drys_ls)"
+# }}}
+
 # {{{ drys repo
-__fish_drys_complete_repo -s 'l' -l 'list' -f
+__fish_drys_complete_repo -a "(drys repo -ln)" -f
+__fish_drys_complete_repo -s 'l' -l 'list' -d 'List repositories' -f
+# }}}
+
+# {{{ drys cd
+__fish_drys_complete_cd -f -a "(complete -C (commandline -cp | sed 's/cd/repo/') | grep -v -- '^--*.*')"
 # }}}
 
 # {{{ drys config
