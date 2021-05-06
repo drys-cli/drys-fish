@@ -1,11 +1,11 @@
-function __fish_drys_print_extended_help
-    command drys -h
+function __fish_tem_print_extended_help
+    command tem -h
     echo -e "\nfish commands:\n"
     echo -e "    cd\t\t\tcd to repository directory"
 end
 
-function __fish_drys_cd_help
-    echo -e "usage: drys cd [-h] [-c FILE] [-R REPO] [--reconfigure] [repository]\n"
+function __fish_tem_cd_help
+    echo -e "usage: tem cd [-h] [-c FILE] [-R REPO] [--reconfigure] [repository]\n"
     echo -e "positional arguments:"
     echo -e "  repository           \trepository name, pseudo-path or path to cd to\n"
     echo -e "optional arguments:"
@@ -16,29 +16,29 @@ function __fish_drys_cd_help
     echo -e "  --reconfigure        \tdiscard any configuration loaded before reading this option"
 end
 
-function drys
+function tem
     for arg in $argv
         # First non-option argument is a subcommand
         if [ (echo "$arg" | cut -c 1) != "-" ]
             # COMMAND cd
             if [ "$arg" = "cd" ]
-                # drys cd --help
+                # tem cd --help
                 if contains -- '-h' $argv -o contains -- '--help' $argv
-                    __fish_drys_cd_help
+                    __fish_tem_cd_help
                     return
                 end
-                # drys cd arguments...
+                # tem cd arguments...
                 set -l argv[(contains -i cd $argv)] 'repo'
-                cd (drys $argv -lp | head -1)
+                cd (tem $argv -lp | head -1)
                 return $status
             # COMMAND IS NOT PART OF THIS FISH EXTENSION
             else; break; end
         else if contains -- "$arg" '-h' '--help'
-            __fish_drys_print_extended_help
+            __fish_tem_print_extended_help
             return
         end
     end
-    command drys $argv
+    command tem $argv
 end
 
 # vim: ft=fish

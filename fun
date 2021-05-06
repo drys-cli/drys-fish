@@ -1,1 +1,1 @@
-fish/vendor_functions.d/drys.fish
+fish/vendor_functions.d/tem.fish
