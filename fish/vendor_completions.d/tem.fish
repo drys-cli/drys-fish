@@ -1,4 +1,4 @@
-set -l SUBCOMMANDS add rm ls put config repo cd
+set -l SUBCOMMANDS add rm ls put config repo cd init env
 
 # {{{ Helper functions
 
@@ -65,7 +65,7 @@ end
 
 # Generate completions for tem repo
 function __fish_tem_repo_completions
-    argparse 'R/repo=+' -- (commandline -cpo)
+    argparse --ignore-unknown 'R/repo=+' -- (commandline -cpo)
     if [ (count $_flag_R) -gt 0 ]             # commandline has -R options
         tem repo -ln (printf -- "-R\n%s\n" $_flag_R)
     else                                      # commandline has no -R options
