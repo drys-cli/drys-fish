@@ -35,6 +35,7 @@ end
 
 function __fish_tem_ls
     set -l comp (commandline -ct)
+    # Iterate through repository paths
     for repo in (tem repo -lp)
         pushd "$repo"
         if [ "$argv[1]" = '/' ]
@@ -48,10 +49,10 @@ end
 
 # Generate completions for -R/--repo option
 function __fish_tem_complete_R
+    # Last cmdline token
     set -l comp (commandline -ct)
     tem repo -l | read -zl repos
     tem repo -ln | read -zl repo_names
-
     if [ -z "$comp" ]
         string replace -a ' @ ' \t "$repos" | string replace "/home/$USER" '~'
         __fish_complete_directories "$comp"
