@@ -1,1 +1,0 @@
-fish/vendor_functions.d/tem.fish
