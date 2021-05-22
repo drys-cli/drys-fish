@@ -38,31 +38,22 @@ end
 # This will run `tem env` every time the user cd's into a directory that has a
 # a .tem/ subdirectory, or one of its parent directories does
 function env_auto_ --on-variable PWD
-    # This variable is used to prevent the rest of this function from
-    # being triggered when we modify PWD within this function. That would cause
-    # an infinite recursion.
-    if [ -n "$env_auto_disable_" ]; return; end
-
-    set -l _PWD "$PWD"
-    # Effectively perform `cd ..` until the current directory contains '.tem/env'
-    # or '.tem/fish-env'. Then run `tem env` in that directory.
-    while [ "$_PWD" != '/' ]
-        if [ -d "$_PWD/.tem/fish-env" -o -d "$_PWD.tem/env" ]
-            # Disable event-handling for this function temporarily          (*)
-            set -g env_auto_disable_ 'true'
-
-            pushd "$_PWD"
-            set -e env_aliases_
-            tem env
-            set -l __status $status
-            popd
-
-            # Re-enable it                                                  (*)
-            set -g env_auto_disable_ ''
-            return $__status
-        end
-        set _PWD (dirname "$_PWD")
+    # TODO Consider what happens if this function is somehow aborted
+    env_auto_disabled_ && return
+    disable_auto_env_
+    # cd to the first parent directory (or ./) containing .tem/env or
+    # .tem/fish-env and run `tem env` there.
+    set -l tem_project (first_tem_project_)
+    if [ -n "$tem_project" ]
+        pushd "$tem_project"
+        set -e env_aliases_
+        tem env
+        set -l _status $status
+        popd
+        enable_auto_env_
+        return $_status
     end
+    enable_auto_env_
 end
 
 function env_exec_
