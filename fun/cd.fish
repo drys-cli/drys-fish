@@ -25,6 +25,7 @@ function cd_
         echo "tem: error: unrecognized arguments: $argv[2]"
         return 2
     end
+    set -S | grep _flag_
     # TODO WHY THE HELL IS _flag_env NOT SET HERE??
     # The following shows that _flag_env is not empty:
     # set -S _flag_env
@@ -34,8 +35,9 @@ function cd_
     if [ -n "$_flag_help" ]     # --help option
         cd_help_; return 0
     end
-    for x in env path fish-env hooks
+    for x in path fish-env hooks env 
         if [ -n (eval echo '$_flag_'(string replace '-' '_' "$x")) ]
+            echo $x
             set -l tem_project (first_tem_project_)
             if [ -d "$tem_project/.tem/$x" ]
                 disable_auto_env_
@@ -48,7 +50,6 @@ function cd_
             end
         end
     end
-    return
     # Call `tem repo` with the same tem arguments
     set -l argv[(contains -i -- cd $argv)] 'repo'
     cd (command tem $argv -lp | head -1)

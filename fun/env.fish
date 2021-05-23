@@ -44,7 +44,7 @@ function env_auto_ --on-variable PWD
     # cd to the first parent directory (or ./) containing .tem/env or
     # .tem/fish-env and run `tem env` there.
     set -l tem_project (first_tem_project_)
-    if [ -n "$tem_project" ]
+    if [ -n "$tem_project" -a \( -d "$tem_project/.tem/env" -o -d "$tem_project/.tem/fish-env" \) ]
         pushd "$tem_project"
         set -e env_aliases_
         tem env
