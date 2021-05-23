@@ -4,9 +4,9 @@ function cd_help_
     echo -e "  repository           \trepository name, pseudo-path or path to cd to\n"
     echo -e "optional arguments:"
     echo -e "  -p, --path           \tcd to '.tem/path' if available"
+    echo -e "  -e, --env            \tcd to '.tem/env' if available"
     echo -e "  -f, --fish-env       \tcd to '.tem/fish-env' if available"
-    echo -e "  -e, --env            \tcd to '.tem/fish-env' if available"
-    echo -e "  -H, --hooks          \tcd to '.tem/hooks' if available"
+    echo -e "  -H, --hooks          \tcd to '.tem/hooks' if available\n"
     echo -e "general options:"
     echo -e "  -h, --help           \tshow this help message and exit"
     echo -e "  -c FILE, --config FILE"
@@ -25,7 +25,6 @@ function cd_
         echo "tem: error: unrecognized arguments: $argv[2]"
         return 2
     end
-    set -S | grep _flag_
     # TODO WHY THE HELL IS _flag_env NOT SET HERE??
     # The following shows that _flag_env is not empty:
     # set -S _flag_env
@@ -37,7 +36,6 @@ function cd_
     end
     for x in path fish-env hooks env 
         if [ -n (eval echo '$_flag_'(string replace '-' '_' "$x")) ]
-            echo $x
             set -l tem_project (first_tem_project_)
             if [ -d "$tem_project/.tem/$x" ]
                 disable_auto_env_

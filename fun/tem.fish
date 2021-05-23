@@ -1,6 +1,7 @@
 function tem
     # This is just a way to source this file on fish startup (cf. manpage)
     if [ "$argv" = 'fish-init' ]
+        env_auto_
         return
     end
     for arg in $argv
