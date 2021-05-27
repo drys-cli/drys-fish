@@ -9,11 +9,9 @@ function tem
         if [ (echo "$arg" | cut -c 1) != "-" ]
             switch "$arg"
                 case cd
-                    cd_ $argv
-                    return $status
+                    cd_ $argv; return
                 case env
-                    env_ $argv
-                    return $status
+                    env_ $argv; return
             end
             break
         else if contains -- "$arg" '-h' '--help'

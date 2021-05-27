@@ -14,7 +14,6 @@ end
 
 function env_auto_disabled_
     [ -n "$env_auto_disable_" ]
-    return $status
 end
 
 # If this directory contains a .tem/ subdir, return $PWD

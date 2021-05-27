@@ -3,7 +3,7 @@ function env_
         'A/aliases' 'E/editor' 'l/list' -- $argv
     if [ -n "$_flag_help" ]                         # --help option
         env_help_
-        return 0
+        return
     end
     if [ -n "$_flag_aliases" ]                      # --aliases option
         [ -n "$env_aliases_" ] && printf "%s '%s'\n" $env_aliases_
@@ -11,19 +11,19 @@ function env_
     end
 
     if [ -z "$_flag_no_source" ]
-        if [ -d '.tem' ]; and not contains -- "$PWD/.tem/path" $PATH
+        if [ -d '.tem' ] && [ "$PATH[1]" != "$PWD/.tem/path" ]
             set -gx PATH "$PWD/.tem/path" $PATH
         end
-        if [ -d '.tem/fish-env' ]
-            set -gx TEM_ROOTDIR "$PWD"
-            env_exec_
-        end
+        set -gx TEM_ROOTDIR "$PWD"
+        [ -d '.tem/fish-env' ] && env_exec_
     end
     # Also run vanilla command if no -X option was specified
     if [ -z "$_flag_no_exec" ]
+        # Bring back options that argparse consumed
+        [ -n "$_flag_list" ] && set -la argv '-l'
         # Options that vanilla `tem env` doesn't recognize were removed by argparse
         command tem $argv
-        return $status
+        return
     end
 end
 
@@ -56,6 +56,7 @@ function env_auto_ --on-variable PWD
     enable_auto_env_
 end
 
+# --exec option
 function env_exec_
     # Extend definition of the alias function to record all aliases that were
     # created in the sourced files (to the variable env_aliases_)

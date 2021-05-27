@@ -32,7 +32,7 @@ function cd_
     # echo "$_flag_env"
     # HOW THE HELL IS THIS POSSIBLE?????
     if [ -n "$_flag_help" ]     # --help option
-        cd_help_; return 0
+        cd_help_; return
     end
     for x in path fish-env hooks env 
         if [ -n (eval echo '$_flag_'(string replace '-' '_' "$x")) ]
@@ -41,7 +41,7 @@ function cd_
                 disable_auto_env_
                 cd "$tem_project/.tem/$x/"
                 enable_auto_env_
-                return 0
+                return
             else
                 echo "tem: error: '.tem/$x/' does not exist" >&2
                 return 1
@@ -50,6 +50,6 @@ function cd_
     end
     # Call `tem repo` with the same tem arguments
     set -l argv[(contains -i -- cd $argv)] 'repo'
-    cd (command tem $argv -lp | head -1)
-    return $status
+    set -l dest (command tem $argv -lp | head -1)
+    [ -n "$dest" ] && cd "$dest"
 end
