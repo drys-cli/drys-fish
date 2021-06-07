@@ -34,7 +34,7 @@ function cd_
     if [ -n "$_flag_help" ]     # --help option
         cd_help_; return
     end
-    for x in path fish-env hooks env 
+    for x in path fish-env hooks env
         if [ -n (eval echo '$_flag_'(string replace '-' '_' "$x")) ]
             set -l tem_project (first_tem_project_)
             if [ -d "$tem_project/.tem/$x" ]

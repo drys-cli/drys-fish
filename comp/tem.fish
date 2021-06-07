@@ -1,4 +1,4 @@
-set -l SUBCOMMANDS add rm put ls repo config init env git cd fish-init
+set -l SUBCOMMANDS add rm put ls repo config init env git hook cd fish-init
 
 # {{{ Helper functions
 
@@ -25,7 +25,8 @@ for cmd in $SUBCOMMANDS
      end'
 end
 
-function complete_files_
+# Complete paths matching $argv
+function complete_paths_
     complete -C"nOnExIsTeNtCoMmAndZIOAGA2329jdbfaFkahDf21234h8z43 $argv"
 end
 
@@ -34,15 +35,19 @@ function last_arg_
     string match -q -- $argv[1] (commandline -cpo | tail -1)
 end
 
+# Complete paths but look only inside tem repos
+# If '/' is specified as an argument, only directories are considered
 function ls_
-    set -l comp (commandline -ct)
+    set -l cmdline (commandline -po)
+    set -l last (commandline -ct)
+    argparse -i 'R/repo=+' -- $cmdline
     # Iterate through repository paths
-    for repo in (tem repo -lp)
+    for repo in (command tem repo -lp $_flag_R)
         pushd "$repo"
         if [ "$argv[1]" = '/' ]
-            __fish_complete_directories "$comp" ''
+            __fish_complete_directories "$last" ''
         else
-            complete_files_ "$comp"
+            complete_paths_ "$last"
         end
         popd
     end
@@ -51,17 +56,16 @@ end
 # Generate completions for -R/--repo option
 function complete_R_
     # Last cmdline token
-    set -l comp (commandline -ct)
-    tem repo -l | read -zl repos
-    tem repo -ln | read -zl repo_names
-    if [ -z "$comp" ]
+    set -l last (commandline -ct)
+    command tem repo -l | read -zl repos
+    command tem repo -ln | read -zl repo_names
+    if [ -z "$last" ]
         string replace -a ' @ ' \t "$repos" | string replace "/home/$USER" '~'
-        __fish_complete_directories "$comp"
-    # TODO escape any parts of $comp matchable by regex
-    else if string match -rq "^$comp.*" "$repo_names"
+        __fish_complete_directories "$last"
+    else if echo "$repo_names" | string match -rq "^$last.*"
         string replace -a ' @ ' \t "$repos" | string replace "/home/$USER" '~'
     else
-        __fish_complete_directories "$comp"
+        __fish_complete_directories "$last"
     end
 end
 
@@ -69,9 +73,9 @@ end
 function repo_completions_
     argparse --ignore-unknown 'R/repo=+' -- (commandline -cpo)
     if [ (count $_flag_R) -gt 0 ]             # commandline has -R options
-        tem repo -ln (printf -- "-R\n%s\n" $_flag_R)
+        command tem repo -ln (printf -- "-R\n%s\n" $_flag_R)
     else                                      # commandline has no -R options
-        tem repo -ln
+        command tem repo -ln
     end
 end
 # }}}
@@ -80,6 +84,8 @@ end
 complete -c tem -n "not __fish_seen_subcommand_from $SUBCOMMANDS" -f -a "$SUBCOMMANDS"
 complete -c tem -s 'h' -l 'help' -d 'Print help' -f
 complete -c tem -s 'R' -l 'repo' -d 'Used repositories' -a "(complete_R_)" -frk
+complete -c tem -s 'c' -l 'config' -d 'Use different config' -Frk
+complete -c tem -l 'reconfigure' -d 'Discard previous config' -f
 # }}}
 
 # {{{ tem put
@@ -89,9 +95,10 @@ complete_put_ -f\
     -n 'not last_arg_ -d && not last_arg_ -o'
 
 complete_put_ -s 'o' -l 'output' -rkF -d 'Destination file'
-
 complete_put_ -s 'd' -l 'directory' -rf -d 'Destination directory'\
     -a "(__fish_complete_directories)"
+complete_put_ -s 'e' -l 'edit' -d 'Edit in default editor'
+# complete_put_ -s 'e' -l 'edit' -rk -d 'Edit in default editor' -a '(ls_)'
 
 # }}}
 
