@@ -30,6 +30,28 @@ function complete_paths_
     complete -C"nOnExIsTeNtCoMmAndZIOAGA2329jdbfaFkahDf21234h8z43 $argv"
 end
 
+# Return success if the command line contains no positional arguments
+function no_positional_args_
+    set -l -- args    (commandline -po)         # cmdline broken up into list
+    set -l -- cmdline (commandline -p)          # single string
+    set -l -- n       (count $args)             # number of cmdline tokens
+    for i in (seq 2 $n)
+        set -l arg $args[$i]
+        [ -z "$arg" ] && continue               # can be caused by '--' argument
+
+        # If the the last token is a positional argument and there is no
+        # trailing space, we ignore it
+        [ "$i" = "$n" ] && [ (string sub -s -1 "$cmdline") != ' ' ] && break
+
+        if string match -rvq '^-' -- "$arg"     # doesn't start with -
+            return 1
+        end
+    end
+    # contains a '--' argument
+    string match -r -- '\s--\s' "$cmdline" && return 1
+    return 0
+end
+
 # Return success if the last cmdline token is one of those provided as arguments
 function last_arg_
     contains -- (commandline -cpo | tail -1) $argv
@@ -88,23 +110,34 @@ function complete_commands_
         sed 's/$/\tExecutable/'
 end
 
+# Add --editor and -e options for command "$argv[1]"
+function complete_edit_options_
+    # TODO The double underscores are not a mistake. It is a trick that enables
+    # the substitutions from the Makefile to work properly
+    complete__"$argv[1]" -s 'e' -l 'edit'   -f   -d "Open in default editor"
+    complete__"$argv[1]" -s 'E' -l 'editor' -rkf -d "Open in specified editor" -a "(complete_commands_)"
+end
+
 # }}}
 
 # {{{ Defaults
-complete -c tem -n "not __fish_seen_subcommand_from $SUBCOMMANDS" -f -a "$SUBCOMMANDS"
-complete -c tem -s 'h' -l 'help' -d 'Print help' -f
-complete -c tem -s 'R' -l 'repo' -d 'Used repositories' -a "(complete_R_)" -frk
-complete -c tem -s 'c' -l 'config' -d 'Use different config' -Frk
-complete -c tem -l 'reconfigure' -d 'Discard previous config' -f
+complete -c tem -n no_positional_args_ -f -a "$SUBCOMMANDS"
+complete -c tem -l 'help'      -s 'h'  -d 'Print help'
+complete -c tem -l 'version'   -s 'v'  -d 'Print version'
+complete -c tem -l 'debug'             -d 'Start debugger'
+complete -c tem -l 'init-user'         -d 'Initialize user config' -n no_positional_args_
+complete -c tem -l 'repo'      -s 'R'  -d 'Used repositories'      -a "(complete_R_)" -frk
+complete -c tem -l 'config'    -s 'c'  -d 'Use different config'   -Frk
 # }}}
 
 # {{{ tem add
 
-complete_add_ -s 'd' -l 'directory' -rkf -d 'Destination directory'\
-    -a "(ls_ /)"
+complete_add_ -s 'o' -l 'output'    -rkf -d 'Destination file'      -a "(ls_)"
+complete_add_ -s 'd' -l 'directory' -rkf -d 'Destination directory' -a "(ls_ /)"
+complete_add_ -s 'm' -l 'move'      -f   -d 'Move the file'
+complete_add_ -s 'r' -l 'recursive' -f   -d 'Recurse into subdirectories'
 
-complete_add_ -s 'o' -l 'output' -rkf -d 'Destination file'\
-    -a "(ls_)"
+complete_edit_options_ add
 
 # }}}
 
@@ -127,16 +160,14 @@ complete_put_ -s 'e' -l 'edit' -d 'Edit in default editor'
 # {{{ tem ls
 
 complete_ls_ -f -a "(ls_)" -n 'not last_arg_ -e -E'
-complete_ls_ -s 's' -l 'short' -d 'Print short version'
-complete_ls_ -s 'p' -l 'path' -d 'Print full path'
-complete_ls_ -s 'x' -l 'command' -d 'Custom command to use'\
-    -a "(complete_commands_)"
-complete_ls_ -s 'n' -l 'number' -d 'Maximum number of listed entries'
-complete_ls_ -s 'e' -l 'edit' -d 'Edit target files'
-complete_ls_ -s 'E' -l 'editor' -r -d 'Edit files in a custom editor'\
-    -a "(complete_commands_)"
-complete_ls_ -s 'r' -l 'recursive' -d 'Recurse into subdirectories'
-complete_ls_ -l 'norecursive' -d 'Do not recurse into subdirectories'
+complete_ls_ -s 's' -l 'short'          -d 'Print short version'
+complete_ls_ -s 'p' -l 'path'           -d 'Print full path'
+complete_ls_ -s 'x' -l 'command'        -d 'Custom command to use'              -a "(complete_commands_)"
+complete_ls_ -s 'n' -l 'number'         -d 'Maximum number of listed entries'
+complete_ls_ -s 'e' -l 'edit'           -d 'Edit target files'
+complete_ls_ -s 'E' -l 'editor'      -r -d 'Edit files in a custom editor'      -a "(complete_commands_)"
+complete_ls_ -s 'r' -l 'recursive'      -d 'Recurse into subdirectories'
+complete_ls_        -l 'norecursive'    -d 'Do not recurse'
 
 # }}}
 
@@ -150,14 +181,38 @@ complete_repo_ -s 'r' -l 'remove' -d 'Remove repositories from REPO_PATH' -f
 # }}}
 
 # {{{ tem config
-
 complete_config_ -f
 complete_config_ -s 'f' -l 'file' -r -a '(__fish_complete_directories)'
+# }}}
 
+# {{{ tem env
+complete_env_ -f -a "(command ls -1 .tem/env 2>/dev/null)"
+complete_env_ -s 'x' -l 'exec'      -d "Execute files"
+complete_env_ -s 'n' -l 'new'       -d "New empty file"
+complete_env_ -s 'a' -l 'add'       -d "Add files"
+complete_env_ -s 'D' -l 'delete'    -d "Delete files"
+complete_env_ -s 'l' -l 'list'      -d "List files"
+
+# TODO rethink this one
+complete_env_ -s 't' -l 'template'  -d "Template as root directory"
+
+complete_env_ -s 'v' -l 'verbose'   -d "Report status of runs"
+complete_env_ -s 'f' -l 'force'     -d "Disregard warnings"
+complete_env_ -s 'I' -l 'ignore'    -d "Files to ignore"
+
+# TODO Remove from here and add to dot subcommand
+complete_env_        -l 'subdir'    -d "Alternative subdirectory"
+complete_env_        -l 'root'      -d "Files to ignore"
+
+complete_edit_options_ 'env'
 # }}}
 
 # {{{ tem cd
 complete_cd_ -f -a "(complete -C (commandline -cp | sed 's/cd/repo/') | grep -v -- '^--*.*')"
+complete_cd_ -s 'p' -l 'path'       -f -d "cd to .tem/path"
+complete_cd_ -s 'e' -l 'env'        -f -d "cd to .tem/env"
+complete_cd_ -s 'f' -l 'fish-env'   -f -d "cd to .tem/fish-env"
+complete_cd_ -s 'H' -l 'hooks'      -f -d "cd to .tem/hooks"
 # }}}
 
 # vim: foldmethod=marker sw=4
