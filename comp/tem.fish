@@ -1,4 +1,4 @@
-set -l SUBCOMMANDS add rm put ls repo config init env git hook cd fish-init
+set -l SUBCOMMANDS add rm put ls repo config init env git hook cd
 
 # {{{ Helper functions
 
@@ -118,10 +118,10 @@ complete -c tem -l 'config'    -s 'c'  -d 'Use different config'   -Frk
 # }}}
 
 # {{{ tem add
-complete_ add -s 'o' -l 'output'    -rkf -d 'Destination file'      -a "(ls_)"
-complete_ add -s 'd' -l 'directory' -rkf -d 'Destination directory' -a "(ls_ /)"
-complete_ add -s 'm' -l 'move'      -f   -d 'Move the file'
-complete_ add -s 'r' -l 'recursive' -f   -d 'Recurse into subdirectories'
+complete_ add -l 'output'    -s 'o' -rkf -d 'Destination file'      -a "(ls_)"
+complete_ add -l 'directory' -s 'd' -rkf -d 'Destination directory' -a "(ls_ /)"
+complete_ add -l 'move'      -s 'm' -f   -d 'Move the file'
+complete_ add -l 'recursive' -s 'r' -f   -d 'Recurse into subdirectories'
 
 complete_edit_options_ add
 # }}}
@@ -133,65 +133,82 @@ complete_ rm -f -a "(ls_)"
 # {{{ tem put
 complete_ put -f -a "(ls_)" -n 'not last_arg_ -d -o'
 
-complete_ put -s 'o' -l 'output' -rkF -d 'Destination file'
-complete_ put -s 'd' -l 'directory' -rf -d 'Destination directory'\
-    -a "(__fish_complete_directories)"
+complete_ put -l 'output'    -s 'o' -rkF -d 'Destination file'
+complete_ put -l 'directory' -s 'd' -rf  -d 'Destination directory' -a "(__fish_complete_directories)"
+
+complete_edit_options_ put
 # }}}
 
 # {{{ tem ls
 complete_ ls -f -a "(ls_)" -n 'not last_arg_ -e -E'
-complete_ ls -s 's' -l 'short'          -d 'Print short version'
-complete_ ls -s 'p' -l 'path'           -d 'Print full path'
-complete_ ls -s 'x' -l 'command'        -d 'Custom command to use'              -a "(complete_commands_)"
-complete_ ls -s 'n' -l 'number'         -d 'Maximum number of listed entries'
-complete_ ls -s 'e' -l 'edit'           -d 'Edit target files'
-complete_ ls -s 'E' -l 'editor'      -r -d 'Edit files in a custom editor'      -a "(complete_commands_)"
-complete_ ls -s 'r' -l 'recursive'      -d 'Recurse into subdirectories'
-complete_ ls        -l 'norecursive'    -d 'Do not recurse'
+complete_ ls -l 'short'       -s 's'     -d 'Print short version'
+complete_ ls -l 'path'        -s 'p'     -d 'Print full path'
+complete_ ls -l 'command'     -s 'x'     -d 'Custom command to use'              -a "(complete_commands_)"
+complete_ ls -l 'number'      -s 'n' -rf -d 'Maximum number of listed entries'
+complete_ ls -l 'recursive'   -s 'r'     -d 'Recurse into subdirectories'
+complete_ ls -l 'norecursive'            -d 'Do not recurse'
+
+complete_edit_options_ ls
 # }}}
 
 # {{{ tem repo
 complete_ repo -a "(complete_repos_)" -f
-complete_ repo -s 'l' -l 'list' -d 'List repositories' -f
-complete_ repo -s 'n' -l 'name' -d 'Include repository names in output' -f
-complete_ repo -s 'p' -l 'path' -d 'Print repository full path' -f
-complete_ repo -s 'a' -l 'add' -d 'Add repositories to REPO_PATH' -f
-complete_ repo -s 'r' -l 'remove' -d 'Remove repositories from REPO_PATH' -f
+complete_ repo -l 'list'   -s 'l' -d 'List repositories' -f
+complete_ repo -l 'name'   -s 'n' -d 'Include repository names in output' -f
+complete_ repo -l 'path'   -s 'p' -d 'Print repository full path' -f
+complete_ repo -l 'add'    -s 'a' -d 'Add repositories to REPO_PATH' -f
+complete_ repo -l 'remove' -s 'r' -d 'Remove repositories from REPO_PATH' -f
 # }}}
 
 # {{{ tem config
 complete_ config -f
-complete_ config -s 'f' -l 'file' -r -a '(__fish_complete_directories)'
+complete_ config -l 'file'      -s 'f' -r -d 'Configuration file'       -a '(__fish_complete_directories)'
+complete_ config -l 'global'    -s 'g' -f -d 'Use user configuration'
+complete_ config -l 'local'     -s 'l' -f -d 'Use local configuration'
+complete_ config -l 'instance'  -s 'i' -f -d 'Print config from this instance'
+
+complete_edit_options_ config
+# }}}
+
+# {{{ tem init
+complete_ init -l 'example-hooks' -s 'H' -d 'Generate example hooks'
+complete_ init -l 'example-env'   -s 'n' -d 'Generate example env scripts'
+complete_ init -l 'as-repo'       -s 'r' -d 'Initialize as repo'
+complete_ init -l 'force'         -s 'f' -d 'Force overwrite'
+complete_ init -l 'verbose'       -s 'v' -d 'Show generated files'
+
+complete_edit_options_ init
 # }}}
 
 # {{{ tem env
+# TODO Move stuff from here to the dot subcommand
 complete_ env -f -a "(command ls -1 .tem/env 2>/dev/null)"
-complete_ env -s 'x' -l 'exec'      -d "Execute files"
-complete_ env -s 'n' -l 'new'       -d "New empty file"
-complete_ env -s 'a' -l 'add'       -d "Add files"
-complete_ env -s 'D' -l 'delete'    -d "Delete files"
-complete_ env -s 'l' -l 'list'      -d "List files"
+complete_ env -l 'exec'    -s 'x'   -d "Execute files"
+complete_ env -l 'new'     -s 'n'   -d "New empty file"
+complete_ env -l 'add'     -s 'a'   -d "Add files"
+complete_ env -l 'delete'  -s 'D'   -d "Delete files"
+complete_ env -l 'list'    -s 'l'   -d "List files"
 
 # TODO rethink this one
-complete_ env -s 't' -l 'template'  -d "Template as root directory"
-
-complete_ env -s 'v' -l 'verbose'   -d "Report status of runs"
-complete_ env -s 'f' -l 'force'     -d "Disregard warnings"
-complete_ env -s 'I' -l 'ignore'    -d "Files to ignore"
+# TODO filter directories for template
+complete_ env -l 'template' -s 't' -r -d "Template as root directory"
+complete_ env -l 'force'    -s 'f'    -d "Disregard warnings"
+complete_ env -l 'verbose'  -s 'v'    -d "Report status of runs"
+complete_ env -l 'ignore'   -s 'I'    -d "Files to ignore"
 
 # TODO Remove from here and add to dot subcommand
-complete_ env        -l 'subdir'    -d "Alternative subdirectory"
-complete_ env        -l 'root'      -d "Files to ignore"
+complete_ env -l 'subdir'             -d "Alternative subdirectory"
+complete_ env -l 'root'               -d "Files to ignore"
 
-complete_edit_options_ 'env'
+complete_edit_options_ env
 # }}}
 
 # {{{ tem cd
 complete_ cd -f -a "(complete -C (commandline -cp | sed 's/cd/repo/') | grep -v -- '^--*.*')"
-complete_ cd -s 'p' -l 'path'       -f -d "cd to .tem/path"
-complete_ cd -s 'e' -l 'env'        -f -d "cd to .tem/env"
-complete_ cd -s 'f' -l 'fish-env'   -f -d "cd to .tem/fish-env"
-complete_ cd -s 'H' -l 'hooks'      -f -d "cd to .tem/hooks"
+complete_ cd -l 'path'     -s 'p' -f -d "cd to .tem/path"
+complete_ cd -l 'env'      -s 'e' -f -d "cd to .tem/env"
+complete_ cd -l 'fish-env' -s 'f' -f -d "cd to .tem/fish-env"
+complete_ cd -l 'hooks'    -s 'H' -f -d "cd to .tem/hooks"
 # }}}
 
 # vim: foldmethod=marker sw=4
