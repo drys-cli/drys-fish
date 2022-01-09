@@ -35,8 +35,8 @@ function env_help_
     echo -e "  -A, --aliases\t\tlist aliases defined by the command alias"
 end
 
-# This will run `tem env` every time the user cd's into a directory that has a
-# a .tem/ subdirectory, or one of its parent directories does
+# This will run `tem env` every time the user cd's into a temdir
+# or a dir that has a temdir as its (grand)parent
 function env_auto_ --on-variable PWD
     # TODO Consider what happens if this function is somehow aborted
     env_auto_disabled_ && return
@@ -58,17 +58,25 @@ end
 
 # --exec option
 function env_exec_
-    # Extend definition of the alias function to record all aliases that were
-    # created in the sourced files (to the variable env_aliases_)
+    redefine_alias_
+    # Source the files
+    set -l files .tem/fish-env/*
+    for file in $files; source "$file"; end
+    restore_alias_
+end
+
+# Extend definition of the alias function to record all aliases that were
+# created in the sourced files (to the variable env_aliases_)
+function redefine_alias_
     set -g env_aliases_
     copy_function_ alias alias_backup_
     function alias --argument name cmd
         alias_backup_ "$name" "$cmd"
         set -a env_aliases_ "$name" "$cmd"
     end
-    # Source the files
-    set -l files .tem/fish-env/*
-    for file in $files; source "$file"; end
-    # Restore function alias to what it was before
+end
+
+# Restore definition of function alias to what it was before
+function restore_alias_
     copy_function_ alias_backup_ alias
 end

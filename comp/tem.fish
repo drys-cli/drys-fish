@@ -40,7 +40,7 @@ function no_positional_args_
 end
 
 # Return success if the last cmdline token is one of those provided as arguments
-function last_arg_
+function last_arg_one_of_
     contains -- (commandline -cpo | tail -1) $argv
 end
 
@@ -131,7 +131,7 @@ complete_ rm -f -a "(ls_)"
 # }}}
 
 # {{{ tem put
-complete_ put -f -a "(ls_)" -n 'not last_arg_ -d -o'
+complete_ put -f -a "(ls_)" -n 'not last_arg_one_of_ -d -o'
 
 complete_ put -l 'output'    -s 'o' -rkF -d 'Destination file'
 complete_ put -l 'directory' -s 'd' -rf  -d 'Destination directory' -a "(__fish_complete_directories)"
@@ -140,7 +140,7 @@ complete_edit_options_ put
 # }}}
 
 # {{{ tem ls
-complete_ ls -f -a "(ls_)" -n 'not last_arg_ -e -E'
+complete_ ls -f -a "(ls_)" -n 'not last_arg_one_of_ -e -E'
 complete_ ls -l 'short'       -s 's'     -d 'Print short version'
 complete_ ls -l 'path'        -s 'p'     -d 'Print full path'
 complete_ ls -l 'command'     -s 'x'     -d 'Custom command to use'              -a "(complete_commands_)"
