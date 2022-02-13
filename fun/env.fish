@@ -14,7 +14,6 @@ function env_
         if [ -d '.tem' ] && [ "$PATH[1]" != "$PWD/.tem/path" ]
             set -gx PATH "$PWD/.tem/path" $PATH
         end
-        set -gx TEM_ROOTDIR "$PWD"
         [ -d '.tem/fish-env' ] && env_exec_
     end
     # Also run vanilla command if no -X option was specified
@@ -65,7 +64,7 @@ function env_exec_
     restore_alias_
 end
 
-# Extend definition of the alias function to record all aliases that were
+# Extend definition of the `alias` function to record all aliases that were
 # created in the sourced files (to the variable env_aliases_)
 function redefine_alias_
     set -g env_aliases_
