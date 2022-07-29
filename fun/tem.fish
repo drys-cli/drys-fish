@@ -1,9 +1,11 @@
 function tem
     # NOTE: Each entrypoint to vanilla tem should export TEM_SHELL=fish
     set -lx TEM_SHELL "fish"
+    set -lx __TEM_SHELL_SOURCE (mktemp -t __tem_fish_source__.XXXXXXXXXX.fish)
 
-    # This is just a way to source this file on fish startup (cf. manpage)
+    # This is just a way to source this file on fish startup (see manpage)
     if [ "$argv" = 'fish-init' ]
+        # If CWD is under a temdir, run tem env
         env_auto_
         return
     end

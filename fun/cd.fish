@@ -14,7 +14,7 @@ function cd_
     # FIXME This isn't 100% general: what if an option argument is equal to "cd"
     set -l modified_argv
     for arg in $argv
-        if [ "cd" != "$arg" ]
+        if [ "$arg" != "cd" ]
             set -a modified_argv "$arg"
         end
     end

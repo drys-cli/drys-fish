@@ -21,7 +21,7 @@ end
 function first_tem_project_
     set -l _PWD "$PWD"
     # Effectively perform `cd ..` until the current directory contains '.tem/env'
-    # or '.tem/fish-env'
+    # or '.tem/env/@fish'
     while [ "$_PWD" != '/' ]
         if [ -d "$_PWD/.tem" ]
             echo "$_PWD"

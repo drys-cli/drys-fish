@@ -1,6 +1,5 @@
 function env_
-    argparse -i 'h/help' 'S/no-source' 'X/no-exec'  \
-        'A/aliases' 'E/editor' 'l/list' -- $argv
+    argparse -i 'h/help' 'A/aliases' 'l/list' -- $argv
     if [ -n "$_flag_help" ]                         # --help option
         env_help_
         return
@@ -10,28 +9,22 @@ function env_
         return 0
     end
 
-    if [ -z "$_flag_no_source" ]
-        if [ -d '.tem' ] && [ "$PATH[1]" != "$PWD/.tem/path" ]
-            set -gx PATH "$PWD/.tem/path" $PATH
-        end
-        [ -d '.tem/fish-env' ] && env_exec_
+    if [ -d '.tem' ] && [ "$PATH[1]" != "$PWD/.tem/path" ]
+        set -gx PATH "$PWD/.tem/path" $PATH
     end
-    # Also run vanilla command if no -X option was specified
-    if [ -z "$_flag_no_exec" ]
-        # Bring back options that argparse consumed
-        [ -n "$_flag_list" ] && set -la argv '-l'
-        # Options that vanilla `tem env` doesn't recognize were removed by argparse
-        command tem $argv
-        return
-    end
+    [ -d '.tem/env/@fish' ] && env_exec_
+    # Bring back options that argparse consumed
+    [ -n "$_flag_list" ] && set -la argv '-l'
+    [ -n "$_flag_editor" ] && set -lx EDITOR="$_flag_editor"
+    # Options that vanilla `tem env` doesn't recognize were removed by argparse
+    command tem $argv
 end
 
 function env_help_
     command tem env -h
     echo -e "\nfish extension:"
-    echo -e "  -S, --no-source\tignore files in .tem/fish-env/"
-    echo -e "  -X, --no-exec\t\tignore files in .tem/env/"
     echo -e "  -A, --aliases\t\tlist aliases defined by the command alias"
+    echo -e "  -F, --fish   \t\tread and store files in .tem/env/@fish"
 end
 
 # This will run `tem env` every time the user cd's into a temdir
@@ -41,9 +34,9 @@ function env_auto_ --on-variable PWD
     env_auto_disabled_ && return
     disable_auto_env_
     # cd to the first parent directory (or ./) containing .tem/env or
-    # .tem/fish-env and run `tem env` there.
+    # .tem/env/@fish and run `tem env` there.
     set -l tem_project (first_tem_project_)
-    if [ -n "$tem_project" -a \( -d "$tem_project/.tem/env" -o -d "$tem_project/.tem/fish-env" \) ]
+    if [ -n "$tem_project" -a \( -d "$tem_project/.tem/env" -o -d "$tem_project/.tem/env/@fish" \) ]
         pushd "$tem_project"
         set -e env_aliases_
         tem env
@@ -57,9 +50,10 @@ end
 
 # --exec option
 function env_exec_
+    set -gx TEM_SHELL "$TEM_SHELL"
     redefine_alias_
     # Source the files
-    set -l files .tem/fish-env/*
+    set -l files .tem/env/@fish/*
     for file in $files; source "$file"; end
     restore_alias_
 end

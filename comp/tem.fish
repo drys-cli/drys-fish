@@ -63,7 +63,7 @@ function ls_
 end
 
 # Generate completions for -R/--repo option
-function complete_R_
+function complete_repo_
     # Last cmdline token
     set -l last (commandline -ct)
     command tem repo -l | read -zl repos
@@ -113,7 +113,7 @@ complete -c tem -l 'help'      -s 'h'  -d 'Print help'
 complete -c tem -l 'version'   -s 'v'  -d 'Print version'          -n no_positional_args_
 complete -c tem -l 'debug'             -d 'Start debugger'
 complete -c tem -l 'init-user'         -d 'Initialize user config' -n no_positional_args_
-complete -c tem -l 'repo'      -s 'R'  -d 'Used repositories'      -a "(complete_R_)" -frk
+complete -c tem -l 'repo'      -s 'R'  -d 'Used repositories'      -a "(complete_repo_)" -frk
 complete -c tem -l 'config'    -s 'c'  -d 'Use different config'   -Frk
 # }}}
 
@@ -207,7 +207,7 @@ complete_edit_options_ env
 complete_ cd -f -a "(complete -C (commandline -cp | sed 's/cd/repo/') | grep -v -- '^--*.*')"
 complete_ cd -l 'path'     -s 'p' -f -d "cd to .tem/path"
 complete_ cd -l 'env'      -s 'e' -f -d "cd to .tem/env"
-complete_ cd -l 'fish-env' -s 'f' -f -d "cd to .tem/fish-env"
+complete_ cd -l 'fish-env' -s 'f' -f -d "cd to .tem/env/@fish"
 complete_ cd -l 'hooks'    -s 'H' -f -d "cd to .tem/hooks"
 # }}}
 
